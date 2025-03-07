@@ -1,6 +1,7 @@
+use rocket_db_pools::sqlx::FromRow;
 use serde::{Deserialize, Serialize};
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, FromRow)]
 #[serde(rename_all = "camelCase")]
 pub struct RecipeBase {
     pub id: i64,
@@ -57,6 +58,60 @@ pub struct Ingredient {
 pub struct Instruction {
     pub id: i64,
     pub recipe_id: i64,
+    pub position: i64,
+    pub description: String,
+}
+
+#[derive(Debug, Clone, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct CreateRecipeRequest {
+    pub name: String,
+    pub author: Option<String>,
+    pub description: Option<String>,
+    pub difficulty: Option<String>,
+    pub estimated_duration: Option<String>,
+    pub ingredients: Vec<CreateIngredientRequest>,
+    pub instructions: Vec<CreateInstructionRequest>,
+}
+
+#[derive(Debug, Clone, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct CreateIngredientRequest {
+    pub position: i64,
+    pub description: String,
+}
+
+#[derive(Debug, Clone, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct CreateInstructionRequest {
+    pub position: i64,
+    pub description: String,
+}
+
+#[derive(Debug, Clone, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct UpdateRecipeRequest {
+    pub name: String,
+    pub author: Option<String>,
+    pub description: Option<String>,
+    pub difficulty: Option<String>,
+    pub estimated_duration: Option<String>,
+    pub ingredients: Vec<UpdateIngredientRequest>,
+    pub instructions: Vec<UpdateInstructionRequest>,
+}
+
+#[derive(Debug, Clone, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct UpdateIngredientRequest {
+    pub id: Option<i64>, // if it has an id, update it otherwise create
+    pub position: i64,
+    pub description: String,
+}
+
+#[derive(Debug, Clone, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct UpdateInstructionRequest {
+    pub id: Option<i64>, // if it has an id, update it otherwise create
     pub position: i64,
     pub description: String,
 }

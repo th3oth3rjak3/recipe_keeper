@@ -1,0 +1,2 @@
+[default.databases.recipe_keeper]
+url = "sqlite://RecipeKeeper.db3?mode=rwc"
