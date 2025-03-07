@@ -425,12 +425,10 @@ fn items_to_delete<T: MaybeIdentifiable>(original: Vec<i64>, updated: &[T]) -> V
         .filter_map(|ingredient| ingredient.id())
         .collect::<Vec<_>>();
 
-    let to_delete = original
+    original
         .into_iter()
         .filter(|id| !updated_ids.contains(id))
-        .collect::<Vec<_>>();
-
-    to_delete
+        .collect::<Vec<_>>()
 }
 
 fn handle_internal_server_error(err: impl Error) -> Custom<String> {

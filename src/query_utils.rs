@@ -1,10 +1,10 @@
 use sqlx::{QueryBuilder, Sqlite};
 
-pub fn add_in_expression<'a, T>(builder: &mut QueryBuilder<'a, Sqlite>, elements: &'a Vec<T>)
+pub fn add_in_expression<'a, T>(builder: &mut QueryBuilder<'a, Sqlite>, elements: &'a [T])
 where
     T: sqlx::Encode<'a, Sqlite> + sqlx::Type<Sqlite> + Send + Sync,
 {
-    if elements.len() == 0 {
+    if elements.is_empty() {
         return;
     }
 
