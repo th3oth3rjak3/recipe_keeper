@@ -7,6 +7,8 @@ import {
 	Group,
 	Stack,
 	TextInput,
+	Tooltip,
+	useMantineTheme,
 } from "@mantine/core";
 import { useForm } from "@mantine/form";
 import { IconSearch } from "@tabler/icons-react";
@@ -43,8 +45,10 @@ export default function SearchRecipesComponent(
 		props.onSearch(values);
 	};
 
+	const theme = useMantineTheme();
+
 	return (
-		<Card maw={500} w="75%" miw={400}>
+		<Card maw={500} w="75%" miw={400} withBorder>
 			<CardSection>
 				<form onSubmit={searchForm.onSubmit(onSubmit)}>
 					<Stack>
@@ -70,9 +74,11 @@ export default function SearchRecipesComponent(
 								key={searchForm.key("query")}
 								{...searchForm.getInputProps("query")}
 							/>
-							<ActionIcon type="submit" size="lg">
-								<IconSearch />
-							</ActionIcon>
+							<Tooltip color={theme.primaryColor} label="Search">
+								<ActionIcon type="submit" size="lg">
+									<IconSearch />
+								</ActionIcon>
+							</Tooltip>
 						</Group>
 						<Group justify="center" flex={1} mb="md">
 							<Checkbox

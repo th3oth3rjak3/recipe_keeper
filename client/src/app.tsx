@@ -8,6 +8,7 @@ import {
 	ScrollArea,
 	Stack,
 	Text,
+	Tooltip,
 	createTheme,
 	mergeMantineTheme,
 } from "@mantine/core";
@@ -16,7 +17,7 @@ import { IconChevronsLeft, IconMenu3 } from "@tabler/icons-react";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { Link, Outlet } from "@tanstack/react-router";
 import { TanStackRouterDevtools } from "@tanstack/react-router-devtools";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { DarkModeSelector } from "./components/dark-mode-selector";
 import { ThemeSelector } from "./components/theme-selector";
 
@@ -53,6 +54,15 @@ export function App(props: AppProps) {
 		localStorage.setItem("recipe-keeper-theme", theme);
 	};
 
+	const mobileLabel = useMemo(
+		() => (mobileOpened ? "Close Menu" : "Open Menu"),
+		[mobileOpened],
+	);
+	const desktopLabel = useMemo(
+		() => (desktopOpened ? "Close Menu" : "Open Menu"),
+		[desktopOpened],
+	);
+
 	return (
 		<AppShell
 			header={{ height: 48 }}
@@ -66,12 +76,16 @@ export function App(props: AppProps) {
 			<AppShell.Header>
 				<Group h="100%" px="md" justify="space-between">
 					<Group>
-						<ActionIcon hiddenFrom="sm" onClick={toggleMobile}>
-							{mobileOpened ? <IconChevronsLeft /> : <IconMenu3 />}
-						</ActionIcon>
-						<ActionIcon visibleFrom="sm" onClick={toggleDesktop}>
-							{desktopOpened ? <IconChevronsLeft /> : <IconMenu3 />}
-						</ActionIcon>
+						<Tooltip color={props.theme.primaryColor} label={mobileLabel}>
+							<ActionIcon hiddenFrom="sm" onClick={toggleMobile}>
+								{mobileOpened ? <IconChevronsLeft /> : <IconMenu3 />}
+							</ActionIcon>
+						</Tooltip>
+						<Tooltip color={props.theme.primaryColor} label={desktopLabel}>
+							<ActionIcon visibleFrom="sm" onClick={toggleDesktop}>
+								{desktopOpened ? <IconChevronsLeft /> : <IconMenu3 />}
+							</ActionIcon>
+						</Tooltip>
 
 						<Text size="xl">Recipe Keeper</Text>
 					</Group>
