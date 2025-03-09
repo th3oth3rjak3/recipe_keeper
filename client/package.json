@@ -1,0 +1,43 @@
+{
+  "name": "client",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "dev": "vite --port=3001",
+    "build": "vite build",
+    "serve": "vite preview",
+    "start": "vite"
+  },
+  "devDependencies": {
+    "@tanstack/react-router-devtools": "^1.114.2",
+    "@tanstack/router-plugin": "^1.114.1",
+    "@types/react": "^19.0.8",
+    "@types/react-dom": "^19.0.3",
+    "@vitejs/plugin-react": "^4.3.2",
+    "postcss": "^8.5.3",
+    "postcss-preset-mantine": "^1.17.0",
+    "postcss-simple-vars": "^7.0.1",
+    "vite": "^6.0.3"
+  },
+  "dependencies": {
+    "@mantine/core": "^7.17.1",
+    "@mantine/dates": "^7.17.1",
+    "@mantine/form": "^7.17.1",
+    "@mantine/hooks": "^7.17.1",
+    "@mantine/modals": "^7.17.1",
+    "@mantine/notifications": "^7.17.1",
+    "@tabler/icons-react": "^3.31.0",
+    "@tanstack/react-query": "^5.67.2",
+    "@tanstack/react-query-devtools": "^5.67.2",
+    "@tanstack/react-router": "^1.114.1",
+    "@tanstack/router-devtools": "^1.114.1",
+    "dayjs": "^1.11.13",
+    "ky": "^1.7.5",
+    "mantine-form-valibot-resolver": "^3.0.1",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "valibot": "^1.0.0-rc.3"
+  }
+}
