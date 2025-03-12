@@ -27,14 +27,14 @@ export function SearchPage() {
 	const fetchRecipes = async () => {
 		const recipes = await ky
 			.get(
-				`http://localhost:8000/api/recipes?query=${params.query}&include_ingredients=${params.includeIngredients}&include_instructions=${params.includeInstructions}`,
+				`/api/recipes?query=${params.query}&include_ingredients=${params.includeIngredients}&include_instructions=${params.includeInstructions}`,
 			)
 			.json<RecipeBase[]>();
 
 		return recipes;
 	};
 
-	const { data, error, isFetching, refetch } = useQuery({
+	const { data, error, refetch } = useQuery({
 		queryKey: ["recipes", params],
 		queryFn: fetchRecipes,
 		enabled: enabled,

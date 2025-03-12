@@ -11,9 +11,7 @@ import { RecipeDetails } from "../../components/recipe-details";
 import type { Recipe } from "../../models/recipes";
 
 async function fetchRecipeById(recipeId: string): Promise<Recipe> {
-	return await ky
-		.get(`http://localhost:8000/api/recipes/${recipeId}`)
-		.json<Recipe>();
+	return await ky.get(`/api/recipes/${recipeId}`).json<Recipe>();
 }
 
 export const Route = createFileRoute("/recipes/$recipeId")({

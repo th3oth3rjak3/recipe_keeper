@@ -37,7 +37,6 @@ export function RecipeDetails(props: RecipeDetailsProps) {
 	const queryClient = useQueryClient();
 	const navigate = useNavigate();
 
-	// TODO: test that deletion works.
 	const { mutate: deleteRecipe } = useMutation(
 		{
 			mutationKey: ["delete-recipe"],
@@ -56,8 +55,8 @@ export function RecipeDetails(props: RecipeDetailsProps) {
 				await ky.put(`http://localhost:8000/api/recipes/${recipe.id}`, {
 					json: recipe,
 				});
-				props.onRecipeEdited();
 			},
+			onSuccess: () => props.onRecipeEdited(),
 		},
 		queryClient,
 	);
@@ -87,10 +86,7 @@ export function RecipeDetails(props: RecipeDetailsProps) {
 			id: instruction.id && instruction.id > 0 ? instruction.id : null,
 		}));
 
-		console.log(JSON.stringify(recipe, null, 4));
-
 		updateRecipe(recipe);
-		props.onRecipeEdited();
 	};
 
 	const ingredients = useMemo(() => {
@@ -106,7 +102,7 @@ export function RecipeDetails(props: RecipeDetailsProps) {
 
 		if (props.recipe.ingredients.length === 0) {
 			return (
-				<AccordionItem value={"empty"}>
+				<AccordionItem value={"ingredients"}>
 					<AccordionControl>
 						<Text>{"Ingredients"}</Text>
 					</AccordionControl>
@@ -168,7 +164,7 @@ export function RecipeDetails(props: RecipeDetailsProps) {
 
 		if (props.recipe.instructions.length === 0) {
 			return (
-				<AccordionItem value={"empty"}>
+				<AccordionItem value={"instructions"}>
 					<AccordionControl>
 						<Text>{"Instructions"}</Text>
 					</AccordionControl>

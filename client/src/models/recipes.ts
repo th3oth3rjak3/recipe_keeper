@@ -78,3 +78,30 @@ export const UpdateRecipeSchema = v.object({
 
 export type UpdateRecipe = v.InferOutput<typeof UpdateRecipeSchema>;
 
+export const CreateIngredientSchema = v.object({
+    id: v.string(),
+    position: v.number(),
+    description: v.string(),
+});
+
+export type CreateIngredient = v.InferOutput<typeof CreateIngredientSchema>;
+
+export const CreateInstructionSchema = v.object({
+    id: v.string(),
+    position: v.number(),
+    description: v.string(),
+});
+
+export type CreateInstruction = v.InferOutput<typeof CreateInstructionSchema>;
+
+export const CreateRecipeSchema = v.object({
+    name: v.string(),
+    description: v.nullable(v.string()),
+    author: v.nullable(v.string()),
+    difficulty: v.nullable(v.string()),
+    estimatedDuration: v.nullable(v.string()),
+    ingredients: v.array(CreateIngredientSchema),
+    instructions: v.array(CreateInstructionSchema),
+});
+
+export type CreateRecipe = v.InferOutput<typeof CreateRecipeSchema>;
