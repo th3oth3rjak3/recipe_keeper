@@ -15,7 +15,7 @@ export const Route = createFileRoute("/")({
 	component: SearchPage,
 });
 
-function SearchPage() {
+export function SearchPage() {
 	const [params, setParams] = useState<SearchParameters>({
 		query: "",
 		includeIngredients: false,
@@ -37,7 +37,7 @@ function SearchPage() {
 	const { data, error, isFetching, refetch } = useQuery({
 		queryKey: ["recipes", params],
 		queryFn: fetchRecipes,
-		enabled: enabled, // Prevents auto-fetching
+		enabled: enabled,
 	});
 
 	// 🔥 Ensure fetching happens AFTER params are updated
@@ -62,14 +62,15 @@ function SearchPage() {
 	}, [error]);
 
 	const handleSearch = (params: SearchParameters) => {
-		setEnabled(true);
+		if (!enabled) {
+			setEnabled(true);
+		}
 		setParams(params);
 	};
 
 	return (
-		//
-		<Group style={{ width: "100%" }}>
-			<Stack align="center" style={{ width: "100%" }}>
+		<Group w="100%">
+			<Stack align="center" w="100%">
 				<SearchRecipesComponent onSearch={handleSearch} />
 				{data?.map((recipe) => (
 					<RecipeCard key={recipe.id} recipe={recipe} />

@@ -23,10 +23,16 @@ async fn rocket() -> _ {
     // TODO: remove cors once self-hosted.
     let cors = CorsOptions {
         allowed_origins: AllowedOrigins::all(),
-        allowed_methods: vec![Method::Get, Method::Post, Method::Options]
-            .into_iter()
-            .map(From::from)
-            .collect(),
+        allowed_methods: vec![
+            Method::Get,
+            Method::Post,
+            Method::Delete,
+            Method::Put,
+            Method::Options,
+        ]
+        .into_iter()
+        .map(From::from)
+        .collect(),
         allow_credentials: true,
         ..Default::default()
     }

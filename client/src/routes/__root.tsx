@@ -7,6 +7,7 @@ import {
 	MantineProvider,
 	localStorageColorSchemeManager,
 } from "@mantine/core";
+import { ModalsProvider } from "@mantine/modals";
 import { Notifications } from "@mantine/notifications";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { createRootRoute } from "@tanstack/react-router";
@@ -30,8 +31,10 @@ function RootComponent() {
 	return (
 		<QueryClientProvider client={queryClient}>
 			<MantineProvider colorSchemeManager={colorSchemeManager} theme={theme}>
-				<Notifications />
-				<App theme={theme} onThemeChanged={setTheme} />
+				<ModalsProvider>
+					<Notifications />
+					<App theme={theme} onThemeChanged={setTheme} />
+				</ModalsProvider>
 			</MantineProvider>
 		</QueryClientProvider>
 	);

@@ -49,7 +49,7 @@ export function RecipeCard(props: RecipeCardProps) {
 				<Stack p="md">
 					<Button
 						component={Link}
-						variant="transparent"
+						variant="filled"
 						size="lg"
 						to={`/recipes/${props.recipe.id}`}
 					>
