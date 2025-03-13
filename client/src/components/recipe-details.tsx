@@ -42,6 +42,8 @@ export function RecipeDetails(props: RecipeDetailsProps) {
 			mutationKey: ["delete-recipe"],
 			mutationFn: async (id: number) => {
 				await ky.delete(`http://localhost:8000/api/recipes/${id}`);
+			},
+			onSuccess: () => {
 				navigate({ to: "/" });
 			},
 		},
