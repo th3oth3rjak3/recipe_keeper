@@ -1,58 +1,36 @@
-# Stage 1: Build the frontend (npm)
-FROM node:22 AS frontend
-
-# Set working directory for the frontend build
-WORKDIR /app/client
-
-# Copy the frontend source code (npm project)
-COPY ./client/package.json ./client/package-lock.json ./
-RUN npm install
-
-# Build the frontend
-COPY ./client ./
-RUN npm run build
-
-# Stage 2: Build the backend (Rust)
-FROM rust:latest AS builder
-
-# Set the working directory for Rust
+# Stage 1: Build the React application
+FROM node:22 AS react-build
 WORKDIR /app
+COPY client/package.json client/package-lock.json ./client/
+RUN cd client && npm install
+COPY client ./client
+RUN cd client && npm run build
 
-# Install dependencies for Rust build
-RUN apt-get update && apt-get install -y \
-    pkg-config \
-    libssl-dev \
-    libclang-dev \
-    llvm-dev \
-    && rm -rf /var/lib/apt/lists/*
-
-# Copy the Rust source code into the builder
+# Stage 2: Build the Rust application
+FROM rust:latest AS rust-build
+WORKDIR /app
 COPY . .
-
-# Build the Rust project in release mode
+# Copy the React build output from the previous stage
+COPY --from=react-build /app/static ./static
 RUN cargo build --release
 
-# Stage 3: Final minimal runtime image (with newer glibc)
+# Stage 3: Create the final minimal runtime image
 FROM debian:bookworm-slim
-
-# Install necessary runtime libraries for the application
+WORKDIR /app
+# Install necessary runtime dependencies
 RUN apt-get update && apt-get install -y \
-    libssl3 \
-    libc6 \
+    libssl-dev \
     ca-certificates \
     && rm -rf /var/lib/apt/lists/*
 
-# Set working directory for the runtime
-WORKDIR /app
+COPY --from=rust-build /app/Rocket.toml .
+# Copy the built Rust binary from the previous stage
+COPY --from=rust-build /app/target/release/recipe_keeper .
+# Copy the static files from the React build
+COPY --from=react-build /app/static ./static
 
-# Copy the compiled Rust binary from the builder stage
-COPY --from=builder /app/target/release/recipe_keeper /app/recipe_keeper
-
-# Copy the built static assets from the frontend build stage
-COPY --from=frontend /app/static /app/static
-
-# Expose the application port
+# Expose the port your Rocket app runs on
 EXPOSE 8000
 
-# Start the application
+# Command to run your application
 CMD ["/app/recipe_keeper"]

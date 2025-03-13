@@ -1,13 +1,10 @@
 services:
-  app:
+  web:
     build: .
     ports:
       - "8000:8000"
     environment:
-      ROCKET_ENV: "production"
-      ROCKET_ADDRESS: "0.0.0.0"
-      ROCKET_PORT: "8000"
-      DATABASE_URL: "sqlite:/app/data/RecipeKeeper.db3?mode=rwc" # Update with path to your db file inside the container
+      - ROCKET_ENV=production
     volumes:
-      - ./data:/app # Mount ./data directory on the host to /app in the container
+      - ./RecipeKeeper.db3:/app/RecipeKeeper.db3 # Mount the SQLite file at the root of the project
     restart: unless-stopped

@@ -9,12 +9,8 @@ pub mod handlers;
 pub mod query_utils;
 
 use rocket::{
-    Build, Config, Request, Response, Rocket,
+    Build, Request, Response, Rocket,
     fairing::{self, AdHoc, Fairing, Info, Kind},
-    figment::{
-        Figment,
-        providers::{Format, Toml},
-    },
     fs::{FileServer, NamedFile, relative},
     http::Header,
 };
@@ -22,8 +18,6 @@ use rocket_db_pools::{
     Database,
     sqlx::{self},
 };
-
-const ROCKET_TOML: &str = include_str!("../Rocket.toml");
 
 #[derive(Database)]
 #[database("recipe_keeper")]
@@ -80,9 +74,7 @@ fn options_route() -> &'static str {
 
 #[launch]
 async fn rocket() -> _ {
-    let figment = Figment::from(Config::default()).merge(Toml::string(ROCKET_TOML).nested());
-
-    rocket::custom(figment)
+    rocket::build()
         .attach(CORS)
         .attach(RecipeKeeper::init())
         .attach(AdHoc::try_on_ignite("SQLx Migrations", run_migrations))
