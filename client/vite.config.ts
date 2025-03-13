@@ -13,6 +13,7 @@ export default defineConfig({
   ],
   build: {
     outDir: '../static', // specify the output directory here
+    emptyOutDir: true,
   },
   resolve: {
     alias: {
