@@ -67,7 +67,7 @@ function RouteComponent() {
 
 	return (
 		<form onSubmit={form.onSubmit(handleSubmit)}>
-			<ScrollArea m={50} scrollbarSize={6}>
+			<ScrollArea ml={50} mr={50} scrollbarSize={6}>
 				<TextInput
 					label="Recipe Name"
 					key={form.key("name")}

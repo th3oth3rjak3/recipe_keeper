@@ -1,20 +1,30 @@
+use std::env;
 use std::process::Command;
 
 fn main() {
-    // Run the npm build command
-    println!("Running 'npm run build'...");
+    // Get the current build profile (debug or release)
+    let profile = env::var("PROFILE").unwrap_or_else(|_| "debug".to_string());
 
-    let status = Command::new("npm")
-        .arg("run")
-        .arg("build")
-        .current_dir("client") // Specify the directory where your client (frontend) code is located
-        .status()
-        .expect("Failed to run 'npm run build'");
+    // Check if the build profile is debug
+    if profile == "debug" {
+        // Only run npm build during debug mode
+        println!("cargo:warning=Running 'npm run build' in debug mode...");
 
-    if !status.success() {
-        panic!("npm build failed!");
+        // Run 'npm run build' for frontend assets
+        let status = Command::new("npm")
+            .arg("run")
+            .arg("build")
+            .current_dir("client") // Make sure to adjust this path if necessary
+            .status()
+            .expect("Failed to run 'npm run build'");
+
+        if !status.success() {
+            panic!(
+                "'npm run build' failed with exit code: {}",
+                status.code().unwrap_or(-1)
+            );
+        }
+    } else {
+        println!("cargo:warning=Skipping 'npm run build' in release mode...");
     }
-
-    // Optional: tell Cargo to rerun the build script if any files in the client directory change
-    println!("cargo:rerun-if-changed=client/");
 }

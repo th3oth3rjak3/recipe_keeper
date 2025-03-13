@@ -9,5 +9,5 @@ services:
       ROCKET_PORT: "8000"
       DATABASE_URL: "sqlite:/app/data/RecipeKeeper.db3?mode=rwc" # Update with path to your db file inside the container
     volumes:
-      - ./data:/app/data # Mount ./data directory on the host to /app/data in the container
+      - ./data:/app # Mount ./data directory on the host to /app in the container
     restart: unless-stopped
