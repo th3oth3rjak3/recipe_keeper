@@ -44,7 +44,7 @@ export function RecipeCard(props: RecipeCardProps) {
 	);
 
 	return (
-		<Card maw={500} w="75%" miw={400} withBorder>
+		<Card maw={500} w="75%" miw={300} withBorder>
 			<CardSection>
 				<Stack p="md">
 					<Button

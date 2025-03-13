@@ -5,8 +5,8 @@ import {
 	Grid,
 	Group,
 	NumberInput,
+	ScrollArea,
 	Select,
-	Stack,
 	Text,
 	TextInput,
 	Textarea,
@@ -66,8 +66,8 @@ function RouteComponent() {
 	};
 
 	return (
-		<Stack m={50}>
-			<form onSubmit={form.onSubmit(handleSubmit)}>
+		<form onSubmit={form.onSubmit(handleSubmit)}>
+			<ScrollArea m={50} scrollbarSize={6}>
 				<TextInput
 					label="Recipe Name"
 					key={form.key("name")}
@@ -225,11 +225,12 @@ function RouteComponent() {
 						</Grid.Col>
 					</Grid>
 				))}
-
-				<Button type="submit" fullWidth mt="md">
-					Save
-				</Button>
-			</form>
-		</Stack>
+				<Group justify="center">
+					<Button type="submit" fullWidth mt="md">
+						Save
+					</Button>
+				</Group>
+			</ScrollArea>
+		</form>
 	);
 }

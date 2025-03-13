@@ -48,7 +48,7 @@ export default function SearchRecipesComponent(
 	const theme = useMantineTheme();
 
 	return (
-		<Card maw={500} w="75%" miw={400} withBorder>
+		<Card maw={500} w="75%" miw={300} withBorder>
 			<CardSection>
 				<form onSubmit={searchForm.onSubmit(onSubmit)}>
 					<Stack>

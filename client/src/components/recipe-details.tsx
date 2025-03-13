@@ -244,7 +244,7 @@ export function RecipeDetails(props: RecipeDetailsProps) {
 
 	return (
 		<>
-			<Card maw={800} w="75%" miw={400} withBorder>
+			<Card maw={800} w="75%" miw={300} withBorder>
 				<CardSection>
 					<Stack p="md">
 						<Text fz="h2" lh="md" ta="center">

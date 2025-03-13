@@ -3,9 +3,10 @@ name = "recipe_keeper"
 version = "0.1.0"
 edition = "2024"
 
+build = "build.rs"
+
 [dependencies]
 rocket = { version = "0.5.1", features = ["json", "serde_json"] }
-rocket_cors = "0.6.0"
 rocket_db_pools = { version = "0.2.0", features = [
     "sqlx_macros",
     "sqlx_sqlite",
