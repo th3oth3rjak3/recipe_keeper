@@ -41,54 +41,28 @@ jobs:
         run: cargo build --release
         working-directory: ./ # Ensure we are building the Rust project from the root directory
 
-      - name: Verify Build Outputs
-        run: ls -lah target/release
-
-      - name: Prepare Package Directory
+      - name: Create Platform Folder
         run: |
-          APP_NAME="recipe-keeper"
-          VERSION="${GITHUB_REF#refs/tags/v}"
+          # Automatically detect the platform and architecture
+          PLATFORM="${RUNNER_OS}-${RUNNER_ARCH}"
+          mkdir -p "release/$PLATFORM"
 
-          # Create the directory structure for the Debian package
-          mkdir -p package/usr/bin
-
-          # Move the compiled binary to /usr/bin
-          cp target/release/recipe_keeper package/usr/bin/
-
-          # Verify package contents
-          ls -lah package/usr/bin
-
-      - name: Package .deb
+      - name: Move Binary to Platform Folder
         run: |
-          APP_NAME="recipe-keeper"
-          VERSION="${GITHUB_REF#refs/tags/v}"
+          # Move the built binary to the platform-specific folder
+          PLATFORM="${RUNNER_OS}-${RUNNER_ARCH}"
+          cp target/release/recipe_keeper "release/$PLATFORM/recipe_keeper"
 
-          # Create control file for .deb metadata
-          mkdir -p package/DEBIAN
-          cat <<EOF > package/DEBIAN/control
-          Package: $APP_NAME
-          Version: $VERSION
-          Section: utils
-          Priority: optional
-          Architecture: amd64
-          Depends: libc6 (>= 2.28), libsqlite3-dev
-          Maintainer: Jake Hathaway <jake.d.hathaway@gmail.com>
-          Description: Recipe Keeper - A simple web-based recipe manager built with Rust, Axum, and SQLite.
-          EOF
-
-          # Build the .deb package
-          dpkg-deb --build package ${APP_NAME}_${VERSION}_amd64.deb
-
-      - name: Upload .deb Artifact
+      - name: Upload binary
         uses: actions/upload-artifact@v4
         with:
-          name: recipe_keeper-deb
-          path: recipe-keeper_*_amd64.deb
+          name: recipe_keeper
+          path: release/ # Upload the whole release folder for easier access
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
-          files: recipe-keeper_*_amd64.deb
+          files: release/${RUNNER_OS}-${RUNNER_ARCH}/recipe_keeper
           draft: false
           prerelease: false
         env:
