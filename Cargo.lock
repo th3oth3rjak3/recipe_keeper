@@ -1361,7 +1361,7 @@ dependencies = [
 
 [[package]]
 name = "recipe_keeper"
-version = "1.0.4"
+version = "1.0.5"
 dependencies = [
  "rocket",
  "rocket_db_pools",
