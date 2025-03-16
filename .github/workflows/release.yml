@@ -38,7 +38,10 @@ jobs:
         working-directory: ./client
 
       - name: Build Rust and Frontend
-        run: cargo build --release
+        run: |
+          # Build frontend with Vite and output to static folder
+          npm run build
+          cargo build --release
 
       - name: Verify Build Outputs
         run: |
@@ -46,24 +49,32 @@ jobs:
           ls -lah static
           ls -lah Rocket.toml || echo "No Rocket.toml found"
 
-      - name: Package .deb
+      - name: Prepare Package Directory
         run: |
           APP_NAME="recipe_keeper"
           VERSION="${GITHUB_REF#refs/tags/v}"
 
-          # Create necessary package structure
-          mkdir -p package/usr/local/bin package/usr/share/static package/etc/$APP_NAME
+          # Create the output directory structure with everything in one folder
+          mkdir -p package/$APP_NAME
 
           # Copy Rust binary
-          cp target/release/$APP_NAME package/usr/local/bin/
+          cp target/release/$APP_NAME package/$APP_NAME/
 
-          # Copy frontend files
-          cp -r static/* package/usr/share/static/
+          # Copy entire static folder to package directory
+          cp -r static package/$APP_NAME/
 
           # Copy Rocket.toml if it exists
           if [ -f Rocket.toml ]; then
-            cp Rocket.toml package/etc/$APP_NAME/
+            cp Rocket.toml package/$APP_NAME/
           fi
+
+          # Verify the contents of the package
+          ls -lah package/$APP_NAME
+
+      - name: Package .deb
+        run: |
+          APP_NAME="recipe_keeper"
+          VERSION="${GITHUB_REF#refs/tags/v}"
 
           # Create control file for .deb metadata
           mkdir -p package/DEBIAN
@@ -74,9 +85,8 @@ jobs:
           Priority: optional
           Architecture: amd64
           Depends: libc6 (>= 2.28), libsqlite3-dev
-          Maintainer: Your Name <you@example.com>
-          Description: Recipe Keeper - A Rocket-based Rust app with a frontend
-           A simple web-based recipe manager built with Rust, Rocket, and SQLite.
+          Maintainer: Jake Hathaway <jake.d.hathaway@gmail.com>
+          Description: Recipe Keeper - A simple web-based recipe manager built with Rust, Rocket, and SQLite.
           EOF
 
           # Build the .deb package
