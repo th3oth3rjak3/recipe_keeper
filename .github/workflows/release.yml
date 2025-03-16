@@ -1,0 +1,98 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*" # Runs when a tag starting with "v" is pushed
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Install Dependencies
+        run: |
+          sudo apt update
+          sudo apt install -y dpkg-dev debhelper libsqlite3-dev
+
+      - name: Set Up Rust
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: x86_64-unknown-linux-gnu
+
+      - name: Cache Cargo Dependencies
+        uses: Swatinem/rust-cache@v2
+
+      - name: Set Up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: "npm"
+          cache-dependency-path: client/package-lock.json
+
+      - name: Install Node.js Dependencies
+        run: npm install
+        working-directory: ./client
+
+      - name: Build Rust and Frontend
+        run: cargo build --release
+
+      - name: Verify Build Outputs
+        run: |
+          ls -lah target/release
+          ls -lah static
+          ls -lah Rocket.toml || echo "No Rocket.toml found"
+
+      - name: Package .deb
+        run: |
+          APP_NAME="recipe_keeper"
+          VERSION="${GITHUB_REF#refs/tags/v}"
+
+          # Create necessary package structure
+          mkdir -p package/usr/local/bin package/usr/share/static package/etc/$APP_NAME
+
+          # Copy Rust binary
+          cp target/release/$APP_NAME package/usr/local/bin/
+
+          # Copy frontend files
+          cp -r static/* package/usr/share/static/
+
+          # Copy Rocket.toml if it exists
+          if [ -f Rocket.toml ]; then
+            cp Rocket.toml package/etc/$APP_NAME/
+          fi
+
+          # Create control file for .deb metadata
+          mkdir -p package/DEBIAN
+          cat <<EOF > package/DEBIAN/control
+          Package: $APP_NAME
+          Version: $VERSION
+          Section: utils
+          Priority: optional
+          Architecture: amd64
+          Depends: libc6 (>= 2.28), libsqlite3-dev
+          Maintainer: Your Name <you@example.com>
+          Description: Recipe Keeper - A Rocket-based Rust app with a frontend
+           A simple web-based recipe manager built with Rust, Rocket, and SQLite.
+          EOF
+
+          # Build the .deb package
+          dpkg-deb --build package ${APP_NAME}_${VERSION}_amd64.deb
+
+      - name: Upload .deb Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: recipe_keeper-deb
+          path: recipe_keeper_*_amd64.deb
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: recipe_keeper_*_amd64.deb
+          draft: false
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

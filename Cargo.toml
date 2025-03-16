@@ -2,6 +2,7 @@
 name = "recipe_keeper"
 version = "0.1.0"
 edition = "2024"
+authors = ["Jake Hathaway <jake.d.hathaway@gmail.com>"]
 
 [dependencies]
 rocket = { version = "0.5.1", features = ["json", "serde_json"] }
