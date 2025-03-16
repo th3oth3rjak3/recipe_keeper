@@ -1211,7 +1211,7 @@ dependencies = [
 
 [[package]]
 name = "recipe_keeper"
-version = "1.0.13"
+version = "1.0.14"
 dependencies = [
  "axum 0.8.1",
  "dotenvy",

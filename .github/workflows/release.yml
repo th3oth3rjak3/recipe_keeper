@@ -7,7 +7,7 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-24.04 # Explicitly use Ubuntu 24.04
 
     steps:
       - name: Checkout Repository
@@ -16,7 +16,7 @@ jobs:
       - name: Install Dependencies
         run: |
           sudo apt update
-          sudo apt install -y dpkg-dev debhelper libsqlite3-dev
+          sudo apt install -y libsqlite3-dev  # Only install libsqlite3-dev
 
       - name: Set Up Rust
         uses: dtolnay/rust-toolchain@stable
@@ -26,26 +26,57 @@ jobs:
       - name: Cache Cargo Dependencies
         uses: Swatinem/rust-cache@v2
 
+      - name: Set Up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: "npm"
+          cache-dependency-path: client/package-lock.json
+
+      - name: Install Node.js Dependencies
+        run: npm install
+        working-directory: ./client # Ensure we are installing dependencies in the client folder
+
       - name: Build Rust and Frontend
         run: cargo build --release
         working-directory: ./ # Ensure we are building the Rust project from the root directory
 
-      - name: Create platform-specific folder
+      - name: Debug Build Output
         run: |
-          PLATFORM="ubuntu-24.04-amd64"
+          # List the contents of the target release folder to check if the binary exists
+          ls -lah target/release/
+
+      - name: Create Platform Folder
+        run: |
+          # Hard-code the platform folder path
+          PLATFORM="ubuntu-24.04-x86_64"
+          echo "Creating platform folder: release/$PLATFORM"
           mkdir -p "release/$PLATFORM"
-          cp target/release/recipe_keeper "release/$PLATFORM/"
+
+      - name: Move Binary to Platform Folder
+        run: |
+          # Hard-code the platform folder path
+          PLATFORM="ubuntu-24.04-x86_64"
+          echo "Copying binary to release/$PLATFORM/recipe_keeper"
+          cp target/release/recipe_keeper "release/$PLATFORM/recipe_keeper"
+
+      - name: Verify Platform Folder Contents
+        run: |
+          # Hard-code the platform folder path
+          PLATFORM="ubuntu-24.04-x86_64"
+          echo "Verifying contents of release/$PLATFORM"
+          ls -lah "release/$PLATFORM"
 
       - name: Upload binary
         uses: actions/upload-artifact@v4
         with:
           name: recipe_keeper
-          path: release/ubuntu-24.04-amd64/recipe_keeper
+          path: release/ubuntu-24.04-x86_64/recipe_keeper 
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
-          files: release/ubuntu-24.04-amd64/recipe_keeper
+          files: release/ubuntu-24.04-x86_64/recipe_keeper
           draft: false
           prerelease: false
         env:
