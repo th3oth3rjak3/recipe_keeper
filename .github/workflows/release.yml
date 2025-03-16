@@ -38,9 +38,9 @@ jobs:
         working-directory: ./client
 
       - name: Build Rust and Frontend
+        working-directory: /
         run: |
           # Build frontend with Vite and output to static folder
-          npm run build
           cargo build --release
 
       - name: Verify Build Outputs
