@@ -1,5 +1,5 @@
-use rocket_db_pools::sqlx::FromRow;
 use serde::{Deserialize, Serialize};
+use sqlx::prelude::*;
 
 #[derive(Debug, Clone, Serialize, Deserialize, FromRow)]
 #[serde(rename_all = "camelCase")]

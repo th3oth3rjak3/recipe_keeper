@@ -1,19 +1,21 @@
 [package]
 name = "recipe_keeper"
-version = "1.0.5"
+version = "1.0.6"
 edition = "2024"
 authors = ["Jake Hathaway <jake.d.hathaway@gmail.com>"]
 
 [dependencies]
-rocket = { version = "0.5.1", features = ["json", "serde_json"] }
-rocket_db_pools = { version = "0.2.0", features = [
-    "sqlx_macros",
-    "sqlx_sqlite",
-] }
+axum = { version = "0.8", features = ["macros"] }
+mime_guess = "2.0.5"
+rust-embed = { version = "8", features = ["axum"] }
 serde = { version = "1.0.218", features = ["derive"] }
 serde_json = "1.0.140"
+tokio = { version = "1.44.1", features = ["full"] }
+tower-http = "0.6.2"
+tracing = "0.1.41"
+tracing-subscriber = { version = "0.3.19", features = ["env-filter"] }
 
 [dependencies.sqlx]
 version = "0.7"
 default-features = false
-features = ["macros", "migrate"]
+features = ["sqlite", "runtime-tokio", "macros", "migrate"]

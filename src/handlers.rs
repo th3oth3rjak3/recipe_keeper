@@ -1,38 +1,47 @@
-use std::{collections::HashSet, error::Error};
+use std::collections::HashSet;
 
-use rocket::{Route, http::Status, response::status::Custom, serde::json::Json};
-use rocket_db_pools::Connection;
-use sqlx::{Acquire, QueryBuilder, Sqlite};
-
-use crate::{
-    CreateRecipeRequest, Ingredient, Instruction, Recipe, RecipeBase, RecipeKeeper,
-    UpdateIngredientRequest, UpdateInstructionRequest, UpdateRecipeRequest,
+use axum::{
+    Json,
+    extract::{Path, Query, State},
+    http::{Response, StatusCode},
+    response::{ErrorResponse, IntoResponse},
 };
 
-use crate::query_utils::add_in_expression;
+use serde::Deserialize;
+use sqlx::{QueryBuilder, Sqlite, sqlite::SqlitePool};
+use tracing::error;
 
-#[get("/<id>")]
-async fn get_recipe_by_id(
-    db: Connection<RecipeKeeper>,
-    id: i64,
-) -> Result<Json<Recipe>, Custom<String>> {
+use crate::{
+    AppState,
+    models::{
+        CreateRecipeRequest, Ingredient, Instruction, Recipe, RecipeBase, UpdateIngredientRequest,
+        UpdateInstructionRequest, UpdateRecipeRequest,
+    },
+    query_utils::add_in_expression,
+};
+
+#[axum::debug_handler]
+pub async fn get_recipe_by_id(
+    State(AppState { db }): State<AppState>,
+    Path(id): Path<i64>,
+) -> Result<Json<Recipe>, ErrorResponse> {
     get_recipe(db, id).await.map(Json)
 }
 
-async fn get_recipe(mut db: Connection<RecipeKeeper>, id: i64) -> Result<Recipe, Custom<String>> {
+async fn get_recipe(db: SqlitePool, id: i64) -> Result<Recipe, ErrorResponse> {
     let maybe_recipe = sqlx::query_as!(
         RecipeBase,
         "SELECT id, name, author, description, difficulty, estimated_duration FROM recipes WHERE id = ?",
         id)
-    .fetch_optional(&mut **db)
+    .fetch_optional(&db)
     .await
     .map_err(handle_internal_server_error)?;
 
     let recipe = match maybe_recipe {
-        None => Err(Custom(
-            Status::NotFound,
-            format!("recipe with id {id} not found"),
-        )),
+        None => Err(Response::builder()
+            .status(StatusCode::NOT_FOUND)
+            .body(format!("recipe with id {id} not found"))
+            .unwrap()),
         Some(recipe) => Ok(recipe),
     }?;
 
@@ -41,7 +50,7 @@ async fn get_recipe(mut db: Connection<RecipeKeeper>, id: i64) -> Result<Recipe,
         "SELECT id, recipe_id, position, description FROM ingredients WHERE recipe_id = ?",
         id
     )
-    .fetch_all(&mut **db)
+    .fetch_all(&db)
     .await
     .map_err(handle_internal_server_error)?;
 
@@ -50,21 +59,26 @@ async fn get_recipe(mut db: Connection<RecipeKeeper>, id: i64) -> Result<Recipe,
         "SELECT id, recipe_id, position, description FROM instructions WHERE recipe_id = ?",
         id
     )
-    .fetch_all(&mut **db)
+    .fetch_all(&db)
     .await
     .map_err(handle_internal_server_error)?;
 
     Ok(Recipe::new(recipe, ingredients, instructions))
 }
 
-#[get("/?<query>&<include_ingredients>&<include_instructions>")]
-async fn search_recipes(
-    mut db: Connection<RecipeKeeper>,
-    query: &str,
+#[derive(Debug, Clone, Deserialize)]
+pub struct SearchQueryParams {
+    query: String,
     include_ingredients: bool,
     include_instructions: bool,
-) -> Result<Json<Vec<RecipeBase>>, Custom<String>> {
-    let like_query = format!("%{}%", query);
+}
+
+// #[get("/?<query>&<include_ingredients>&<include_instructions>")]
+pub async fn search_recipes(
+    State(AppState { db }): State<AppState>,
+    Query(params): Query<SearchQueryParams>,
+) -> Result<Json<Vec<RecipeBase>>, ErrorResponse> {
+    let like_query = format!("%{}%", params.query);
 
     let mut builder = QueryBuilder::<Sqlite>::new(
         "SELECT id, author, name, description, difficulty, estimated_duration FROM recipes WHERE name LIKE ",
@@ -77,13 +91,13 @@ async fn search_recipes(
 
     let mut other_ids: HashSet<i64> = HashSet::new();
 
-    if include_ingredients {
+    if params.include_ingredients {
         let ids = sqlx::query_as!(
             Ingredient,
             "SELECT * FROM ingredients WHERE description LIKE ?",
             like_query
         )
-        .fetch_all(&mut **db)
+        .fetch_all(&db)
         .await
         .map(|ingredients| {
             ingredients
@@ -96,13 +110,13 @@ async fn search_recipes(
         other_ids.extend(ids);
     }
 
-    if include_instructions {
+    if params.include_instructions {
         let ids = sqlx::query_as!(
             Instruction,
             "SELECT * FROM instructions WHERE description LIKE ?",
             like_query
         )
-        .fetch_all(&mut **db)
+        .fetch_all(&db)
         .await
         .map(|instructions| {
             instructions
@@ -127,21 +141,20 @@ async fn search_recipes(
 
     let query = builder.build_query_as::<RecipeBase>();
 
-    let results = query.fetch_all(&mut **db).await.map_err(|err| {
+    let results = query.fetch_all(&db).await.map_err(|err| {
         error!("{err}");
-        Custom(Status::InternalServerError, err.to_string())
+
+        handle_internal_server_error(err)
     })?;
 
     Ok(Json(results))
 }
 
-#[post("/", data = "<recipe>")]
-async fn create_recipe(
-    mut db: Connection<RecipeKeeper>,
-    recipe: Json<CreateRecipeRequest>,
-) -> Result<Json<Recipe>, Custom<String>> {
+pub async fn create_recipe(
+    State(AppState { db }): State<AppState>,
+    Json(recipe): Json<CreateRecipeRequest>,
+) -> Result<Json<Recipe>, ErrorResponse> {
     let mut tx = db.begin().await.map_err(handle_internal_server_error)?;
-    let recipe = recipe.into_inner();
 
     let recipe_result = sqlx::query!(
         "INSERT INTO recipes (name, author, description, difficulty, estimated_duration) VALUES (?, ?, ?, ?, ?)",
@@ -196,39 +209,48 @@ async fn create_recipe(
     Ok(Json(recipe))
 }
 
-#[delete("/<id>")]
-async fn delete_recipe(mut db: Connection<RecipeKeeper>, id: i64) -> Custom<String> {
+pub async fn delete_recipe(
+    State(AppState { db }): State<AppState>,
+    Path(id): Path<i64>,
+) -> impl IntoResponse {
     let found = sqlx::query_as!(RecipeBase, "SELECT * from recipes WHERE id = ?", id)
-        .fetch_optional(&mut **db)
+        .fetch_optional(&db)
         .await
         .ok()
         .flatten();
 
     if found.is_none() {
-        return Custom(Status::NotFound, format!("recipe with id {id} not found"));
+        return Response::builder()
+            .status(StatusCode::NOT_FOUND)
+            .body(format!("recipe with id {id} not found"))
+            .unwrap();
     }
 
     sqlx::query!("DELETE FROM recipes WHERE id = ?", id)
-        .execute(&mut **db)
+        .execute(&db)
         .await
-        .map(|_| Custom(Status::NoContent, format!("deleted recipe with id {id}")))
+        .map(|_| {
+            Response::builder()
+                .status(StatusCode::NO_CONTENT)
+                .body(format!("deleted recipe with id {id}"))
+                .unwrap()
+        })
         .unwrap_or_else(handle_internal_server_error)
 }
 
-#[put("/<id>", data = "<recipe>")]
-async fn update_recipe(
-    mut db: Connection<RecipeKeeper>,
-    id: i64,
-    recipe: Json<UpdateRecipeRequest>,
-) -> Result<Json<Recipe>, Custom<String>> {
+// #[put("/<id>", data = "<recipe>")]
+pub async fn update_recipe(
+    State(AppState { db }): State<AppState>,
+    Path(id): Path<i64>,
+    Json(recipe): Json<UpdateRecipeRequest>,
+) -> Result<Json<Recipe>, ErrorResponse> {
     let mut tx = db.begin().await.map_err(handle_internal_server_error)?;
-    let recipe = recipe.into_inner();
 
     // update the main recipe contents.
     sqlx::query!(
         r#"
-            UPDATE recipes 
-            SET name = ?, description = ?, author = ?, difficulty = ?, estimated_duration = ? 
+            UPDATE recipes
+            SET name = ?, description = ?, author = ?, difficulty = ?, estimated_duration = ?
             WHERE id = ?;
         "#,
         recipe.name,
@@ -393,16 +415,6 @@ async fn update_recipe(
     Ok(Json(recipe))
 }
 
-pub fn recipe_routes() -> Vec<Route> {
-    routes![
-        create_recipe,
-        search_recipes,
-        get_recipe_by_id,
-        delete_recipe,
-        update_recipe
-    ]
-}
-
 trait MaybeIdentifiable {
     fn id(&self) -> Option<i64>;
 }
@@ -431,10 +443,11 @@ fn items_to_delete<T: MaybeIdentifiable>(original: Vec<i64>, updated: &[T]) -> V
         .collect::<Vec<_>>()
 }
 
-fn handle_internal_server_error(err: impl Error) -> Custom<String> {
+fn handle_internal_server_error(err: impl std::error::Error) -> Response<String> {
     error!("{err}");
-    Custom(
-        Status::InternalServerError,
-        String::from("Something bad happened, please try again or ask your IT guru for help."),
-    )
+
+    Response::builder()
+        .status(StatusCode::INTERNAL_SERVER_ERROR)
+        .body("Something bad happened, please try again or ask your IT guru for help.".to_owned())
+        .unwrap()
 }
