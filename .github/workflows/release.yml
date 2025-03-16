@@ -16,7 +16,7 @@ jobs:
       - name: Install Dependencies
         run: |
           sudo apt update
-          sudo apt install -y libsqlite3-dev  # Only install libsqlite3-dev
+          sudo apt install -y libsqlite3-dev zip  # Install zip utility
 
       - name: Set Up Rust
         uses: dtolnay/rust-toolchain@stable
@@ -67,16 +67,23 @@ jobs:
           echo "Verifying contents of release/$PLATFORM"
           ls -lah "release/$PLATFORM"
 
-      - name: Upload binary
+      - name: Zip the Folder
+        run: |
+          # Zip the platform folder
+          PLATFORM="ubuntu-24.04-x86_64"
+          zip -r "release/$PLATFORM.zip" "release/$PLATFORM"
+          echo "Zipped folder: release/$PLATFORM.zip"
+
+      - name: Upload Zipped Folder
         uses: actions/upload-artifact@v4
         with:
-          name: recipe_keeper
-          path: release/ubuntu-24.04-x86_64/  # Upload the entire folder
+          name: release-folder
+          path: release/ubuntu-24.04-x86_64.zip  # Upload the zipped folder
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
-          files: release/ubuntu-24.04-x86_64/**/*  # Include all files in the folder
+          files: release/ubuntu-24.04-x86_64.zip  # Include the zipped folder in the release
           draft: false
           prerelease: false
         env:

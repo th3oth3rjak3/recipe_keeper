@@ -1,6 +1,6 @@
 [package]
 name = "recipe_keeper"
-version = "1.0.15"
+version = "1.0.16"
 edition = "2024"
 authors = ["Jake Hathaway <jake.d.hathaway@gmail.com>"]
 
