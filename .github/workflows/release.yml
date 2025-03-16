@@ -35,13 +35,11 @@ jobs:
 
       - name: Install Node.js Dependencies
         run: npm install
-        working-directory: ./client
+        working-directory: ./client # Ensure we're in the correct directory
 
       - name: Build Rust and Frontend
-        working-directory: /
-        run: |
-          # Build frontend with Vite and output to static folder
-          cargo build --release
+        run: cargo build --release
+        working-directory: ./
 
       - name: Verify Build Outputs
         run: |
@@ -86,7 +84,8 @@ jobs:
           Architecture: amd64
           Depends: libc6 (>= 2.28), libsqlite3-dev
           Maintainer: Jake Hathaway <jake.d.hathaway@gmail.com>
-          Description: Recipe Keeper - A simple web-based recipe manager built with Rust, Rocket, and SQLite.
+          Description: Recipe Keeper - A Rocket-based Rust app with a frontend
+           A simple web-based recipe manager built with Rust, Rocket, and SQLite.
           EOF
 
           # Build the .deb package
