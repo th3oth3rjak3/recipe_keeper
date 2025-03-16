@@ -1,0 +1,12 @@
+{
+  "db_name": "SQLite",
+  "query": "\n                UPDATE ingredients\n                SET position = ?, description = ?\n                WHERE id = ?\n            ",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Right": 3
+    },
+    "nullable": []
+  },
+  "hash": "868828f28ccbd4b83bb8a8f56e6e5b2a04182b16b25845a0465f64a85222bc98"
+}

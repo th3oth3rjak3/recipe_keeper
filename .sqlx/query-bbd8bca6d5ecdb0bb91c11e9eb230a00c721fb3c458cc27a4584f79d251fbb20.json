@@ -1,0 +1,38 @@
+{
+  "db_name": "SQLite",
+  "query": "SELECT * FROM ingredients WHERE description LIKE ?",
+  "describe": {
+    "columns": [
+      {
+        "name": "id",
+        "ordinal": 0,
+        "type_info": "Int64"
+      },
+      {
+        "name": "recipe_id",
+        "ordinal": 1,
+        "type_info": "Int64"
+      },
+      {
+        "name": "position",
+        "ordinal": 2,
+        "type_info": "Int64"
+      },
+      {
+        "name": "description",
+        "ordinal": 3,
+        "type_info": "Text"
+      }
+    ],
+    "parameters": {
+      "Right": 1
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false
+    ]
+  },
+  "hash": "bbd8bca6d5ecdb0bb91c11e9eb230a00c721fb3c458cc27a4584f79d251fbb20"
+}

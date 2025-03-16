@@ -1,0 +1,38 @@
+{
+  "db_name": "SQLite",
+  "query": "SELECT id, recipe_id, position, description FROM ingredients WHERE recipe_id = ?",
+  "describe": {
+    "columns": [
+      {
+        "name": "id",
+        "ordinal": 0,
+        "type_info": "Int64"
+      },
+      {
+        "name": "recipe_id",
+        "ordinal": 1,
+        "type_info": "Int64"
+      },
+      {
+        "name": "position",
+        "ordinal": 2,
+        "type_info": "Int64"
+      },
+      {
+        "name": "description",
+        "ordinal": 3,
+        "type_info": "Text"
+      }
+    ],
+    "parameters": {
+      "Right": 1
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false
+    ]
+  },
+  "hash": "1ab4c8b260839255f59908c8b5bb5def0c681fce1c88fc66268ef662fb27a4e5"
+}

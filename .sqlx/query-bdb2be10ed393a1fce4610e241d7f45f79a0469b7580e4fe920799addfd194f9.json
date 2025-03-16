@@ -1,0 +1,38 @@
+{
+  "db_name": "SQLite",
+  "query": "SELECT * FROM instructions WHERE description LIKE ?",
+  "describe": {
+    "columns": [
+      {
+        "name": "id",
+        "ordinal": 0,
+        "type_info": "Int64"
+      },
+      {
+        "name": "recipe_id",
+        "ordinal": 1,
+        "type_info": "Int64"
+      },
+      {
+        "name": "position",
+        "ordinal": 2,
+        "type_info": "Int64"
+      },
+      {
+        "name": "description",
+        "ordinal": 3,
+        "type_info": "Text"
+      }
+    ],
+    "parameters": {
+      "Right": 1
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false
+    ]
+  },
+  "hash": "bdb2be10ed393a1fce4610e241d7f45f79a0469b7580e4fe920799addfd194f9"
+}
