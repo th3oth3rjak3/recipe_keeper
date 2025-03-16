@@ -41,23 +41,36 @@ jobs:
         run: cargo build --release
         working-directory: ./ # Ensure we are building the Rust project from the root directory
 
+      - name: Debug Build Output
+        run: |
+          # List the contents of the target release folder to check if the binary exists
+          ls -lah target/release/
+
       - name: Create Platform Folder
         run: |
           # Automatically detect the platform and architecture
           PLATFORM="${RUNNER_OS}-${RUNNER_ARCH}"
+          echo "Creating platform folder: release/$PLATFORM"
           mkdir -p "release/$PLATFORM"
 
       - name: Move Binary to Platform Folder
         run: |
-          # Move the built binary to the platform-specific folder
+          # Ensure the binary exists and move it to the platform-specific folder
           PLATFORM="${RUNNER_OS}-${RUNNER_ARCH}"
+          echo "Copying binary to release/$PLATFORM/recipe_keeper"
           cp target/release/recipe_keeper "release/$PLATFORM/recipe_keeper"
+
+      - name: Verify Platform Folder Contents
+        run: |
+          PLATFORM="${RUNNER_OS}-${RUNNER_ARCH}"
+          echo "Verifying contents of release/$PLATFORM"
+          ls -lah "release/$PLATFORM"
 
       - name: Upload binary
         uses: actions/upload-artifact@v4
         with:
           name: recipe_keeper
-          path: release/ # Upload the whole release folder for easier access
+          path: release/
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
