@@ -69,9 +69,8 @@ jobs:
       - name: Upload binary
         uses: actions/upload-artifact@v4
         with:
-          name: recipe_keeper
-          path: release/
-
+            name: recipe_keeper
+            path: release/${RUNNER_OS}-${RUNNER_ARCH}/recipe_keeper 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
