@@ -1214,6 +1214,7 @@ name = "recipe_keeper"
 version = "1.0.6"
 dependencies = [
  "axum 0.8.1",
+ "dotenvy",
  "mime_guess",
  "rust-embed",
  "serde",

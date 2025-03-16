@@ -22,6 +22,8 @@ use tracing_subscriber::FmtSubscriber;
 struct Static;
 
 async fn connect_to_database() -> SqlitePool {
+    dotenvy::dotenv().ok();
+
     // Retrieve database URL from environment variables
     let database_url = env::var("DATABASE_URL").expect("DATABASE_URL must be set");
 

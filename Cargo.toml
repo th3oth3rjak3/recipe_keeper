@@ -6,6 +6,7 @@ authors = ["Jake Hathaway <jake.d.hathaway@gmail.com>"]
 
 [dependencies]
 axum = { version = "0.8", features = ["macros"] }
+dotenvy = "0.15.7"
 mime_guess = "2.0.5"
 rust-embed = { version = "8", features = ["axum"] }
 serde = { version = "1.0.218", features = ["derive"] }

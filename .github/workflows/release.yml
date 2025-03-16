@@ -42,36 +42,25 @@ jobs:
         working-directory: ./ # Ensure we are building the Rust project from the root directory
 
       - name: Verify Build Outputs
-        run: |
-          ls -lah target/release
-          ls -lah static
-          ls -lah Rocket.toml || echo "No Rocket.toml found"
+        run: ls -lah target/release
 
       - name: Prepare Package Directory
         run: |
-          APP_NAME="recipe-keeper"  # Changed name to "recipe-keeper"
+          APP_NAME="recipe-keeper"
           VERSION="${GITHUB_REF#refs/tags/v}"
 
-          # Create the output directory structure with everything in one folder
-          mkdir -p package/$APP_NAME
+          # Create the directory structure for the Debian package
+          mkdir -p package/usr/bin
 
-          # Copy Rust binary
-          cp target/release/recipe_keeper package/$APP_NAME/
+          # Move the compiled binary to /usr/bin
+          cp target/release/recipe_keeper package/usr/bin/
 
-          # Copy entire static folder to package directory
-          cp -r static package/$APP_NAME/
-
-          # Copy Rocket.toml if it exists
-          if [ -f Rocket.toml ]; then
-            cp Rocket.toml package/$APP_NAME/
-          fi
-
-          # Verify the contents of the package
-          ls -lah package/$APP_NAME
+          # Verify package contents
+          ls -lah package/usr/bin
 
       - name: Package .deb
         run: |
-          APP_NAME="recipe-keeper"  # Changed name to "recipe-keeper"
+          APP_NAME="recipe-keeper"
           VERSION="${GITHUB_REF#refs/tags/v}"
 
           # Create control file for .deb metadata
@@ -84,7 +73,7 @@ jobs:
           Architecture: amd64
           Depends: libc6 (>= 2.28), libsqlite3-dev
           Maintainer: Jake Hathaway <jake.d.hathaway@gmail.com>
-          Description: Recipe Keeper - A simple web-based recipe manager built with Rust, Rocket, and SQLite.
+          Description: Recipe Keeper - A simple web-based recipe manager built with Rust, Axum, and SQLite.
           EOF
 
           # Build the .deb package
@@ -94,12 +83,12 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: recipe_keeper-deb
-          path: recipe-keeper_*_amd64.deb # Changed to match the new name
+          path: recipe-keeper_*_amd64.deb
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
-          files: recipe-keeper_*_amd64.deb # Changed to match the new name
+          files: recipe-keeper_*_amd64.deb
           draft: false
           prerelease: false
         env:
