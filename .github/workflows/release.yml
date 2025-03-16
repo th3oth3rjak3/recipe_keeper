@@ -71,12 +71,12 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: recipe_keeper
-          path: release/ubuntu-24.04-x86_64/recipe_keeper 
+          path: release/ubuntu-24.04-x86_64/  # Upload the entire folder
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
-          files: release/ubuntu-24.04-x86_64/recipe_keeper
+          files: release/ubuntu-24.04-x86_64/**/*  # Include all files in the folder
           draft: false
           prerelease: false
         env:
