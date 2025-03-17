@@ -46,44 +46,29 @@ jobs:
           # List the contents of the target release folder to check if the binary exists
           ls -lah target/release/
 
-      - name: Create Platform Folder
+      - name: Prepare Binary for Zipping
         run: |
-          # Hard-code the platform folder path
-          PLATFORM="ubuntu-24.04-x86_64"
-          echo "Creating platform folder: release/$PLATFORM"
-          mkdir -p "release/$PLATFORM"
+          # Create a temporary folder for the binary
+          mkdir -p temp_release
+          cp target/release/recipe_keeper temp_release/recipe_keeper
 
-      - name: Move Binary to Platform Folder
+      - name: Zip the Binary
         run: |
-          # Hard-code the platform folder path
-          PLATFORM="ubuntu-24.04-x86_64"
-          echo "Copying binary to release/$PLATFORM/recipe_keeper"
-          cp target/release/recipe_keeper "release/$PLATFORM/recipe_keeper"
+          # Zip the binary with the desired name
+          ZIP_NAME="recipe_keeper-ubuntu-24.04-x86_64"
+          zip -j "release/$ZIP_NAME.zip" temp_release/recipe_keeper
+          echo "Zipped binary: release/$ZIP_NAME.zip"
 
-      - name: Verify Platform Folder Contents
-        run: |
-          # Hard-code the platform folder path
-          PLATFORM="ubuntu-24.04-x86_64"
-          echo "Verifying contents of release/$PLATFORM"
-          ls -lah "release/$PLATFORM"
-
-      - name: Zip the Folder
-        run: |
-          # Zip the platform folder
-          PLATFORM="ubuntu-24.04-x86_64"
-          zip -r "release/$PLATFORM.zip" "release/$PLATFORM"
-          echo "Zipped folder: release/$PLATFORM.zip"
-
-      - name: Upload Zipped Folder
+      - name: Upload Zipped Binary
         uses: actions/upload-artifact@v4
         with:
-          name: release-folder
-          path: release/ubuntu-24.04-x86_64.zip  # Upload the zipped folder
+          name: release-binary
+          path: release/recipe_keeper-ubuntu-24.04-x86_64.zip  # Upload the zipped binary
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
-          files: release/ubuntu-24.04-x86_64.zip  # Include the zipped folder in the release
+          files: release/recipe_keeper-ubuntu-24.04-x86_64.zip  # Include the zipped binary in the release
           draft: false
           prerelease: false
         env:
