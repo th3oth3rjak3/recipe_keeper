@@ -46,29 +46,21 @@ jobs:
           # List the contents of the target release folder to check if the binary exists
           ls -lah target/release/
 
-      - name: Prepare Binary for Zipping
-        run: |
-          # Create a temporary folder for the binary
-          mkdir -p temp_release
-          cp target/release/recipe_keeper temp_release/recipe_keeper
-
       - name: Zip the Binary
         run: |
           # Zip the binary with the desired name
-          ZIP_NAME="recipe_keeper-ubuntu-24.04-x86_64"
-          zip -j "release/$ZIP_NAME.zip" temp_release/recipe_keeper
-          echo "Zipped binary: release/$ZIP_NAME.zip"
+          zip -j "target/release/recipe_keeper-ubuntu-24.04-x86_64.zip" target/release/recipe_keeper
 
       - name: Upload Zipped Binary
         uses: actions/upload-artifact@v4
         with:
           name: release-binary
-          path: release/recipe_keeper-ubuntu-24.04-x86_64.zip  # Upload the zipped binary
+          path: target/release/recipe_keeper-ubuntu-24.04-x86_64.zip  # Upload the zipped binary
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
-          files: release/recipe_keeper-ubuntu-24.04-x86_64.zip  # Include the zipped binary in the release
+          files: target/release/recipe_keeper-ubuntu-24.04-x86_64.zip  # Include the zipped binary in the release
           draft: false
           prerelease: false
         env:

@@ -91,7 +91,9 @@ async fn main() {
         .fallback_service(get(static_handler))
         .with_state(AppState { db: sqlite_pool });
 
-    let address = "0.0.0.0:8000";
+    let port = env::var("PORT_NUMBER").expect("PORT_NUMBER was not set and must be");
+
+    let address = format!("0.0.0.0:{port}");
 
     info!("Starting listener on http://{}", address);
 
