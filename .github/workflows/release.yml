@@ -17,7 +17,7 @@ jobs:
       - name: Install Dependencies
         run: |
           apt update
-          apt install -y libsqlite3-dev zip curl build-essentials
+          apt install -y libsqlite3-dev zip curl build-essential
 
       - name: Set Up Rust
         uses: dtolnay/rust-toolchain@stable
