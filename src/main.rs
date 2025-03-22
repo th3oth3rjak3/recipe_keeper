@@ -6,14 +6,12 @@ pub mod query_utils;
 use std::env;
 
 use axum::{
-    Router,
-    http::{Uri, header},
-    response::{IntoResponse, Response},
-    routing::get,
+    http::{header, Method, Uri}, response::{IntoResponse, Response}, routing::get, Router
 };
 
 use rust_embed::RustEmbed;
 use sqlx::{Sqlite, SqlitePool};
+use tower_http::cors::{Any, CorsLayer};
 use tracing::info;
 use tracing_subscriber::FmtSubscriber;
 
@@ -67,6 +65,8 @@ async fn static_handler(uri: Uri) -> impl IntoResponse {
     StaticFile(path)
 }
 
+
+
 #[tokio::main]
 async fn main() {
     let subscriber = FmtSubscriber::builder()
@@ -80,15 +80,23 @@ async fn main() {
 
     let sqlite_pool = connect_to_database().await;
 
+    let cors = CorsLayer::new()
+    // allow `GET` and `POST` when accessing the resource
+    .allow_methods([Method::GET, Method::POST, Method::PUT, Method::DELETE])
+    // allow requests from any origin
+    .allow_origin(Any);
+
     let app = Router::new()
+
         .route(
             "/api/recipes/{id}",
             get(handlers::get_recipe_by_id)
                 .put(handlers::update_recipe)
                 .delete(handlers::delete_recipe),
         )
-        .route("/api/recipes", get(handlers::search_recipes))
+        .route("/api/recipes", get(handlers::search_recipes).post(handlers::create_recipe))
         .fallback_service(get(static_handler))
+        .layer(cors)
         .with_state(AppState { db: sqlite_pool });
 
     let port = env::var("PORT_NUMBER").expect("PORT_NUMBER was not set and must be");
