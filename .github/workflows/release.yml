@@ -7,7 +7,8 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-24.04 # Explicitly use Ubuntu 24.04
+    runs-on: ubuntu-latest # Still required, but will run inside a Debian container
+    container: debian:bookworm  # Use Debian Bookworm as the build environment
 
     steps:
       - name: Checkout Repository
@@ -49,18 +50,18 @@ jobs:
       - name: Zip the Binary
         run: |
           # Zip the binary with the desired name
-          zip -j "target/release/recipe_keeper-ubuntu-24.04-x86_64.zip" target/release/recipe_keeper
+          zip -j "target/release/recipe_keeper-debian_bookworm-x86_64.zip" target/release/recipe_keeper
 
       - name: Upload Zipped Binary
         uses: actions/upload-artifact@v4
         with:
           name: release-binary
-          path: target/release/recipe_keeper-ubuntu-24.04-x86_64.zip  # Upload the zipped binary
+          path: target/release/recipe_keeper-debian_bookworm-x86_64.zip  # Upload the zipped binary
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
-          files: target/release/recipe_keeper-ubuntu-24.04-x86_64.zip  # Include the zipped binary in the release
+          files: target/release/recipe_keeper-debian_bookworm-x86_64.zip  # Include the zipped binary in the release
           draft: false
           prerelease: false
         env:
